@@ -1,0 +1,17 @@
+{
+  "version": "1.8.0",
+  "hashes": {
+    "restate-cli-aarch64-apple-darwin.tar.xz": "64b1df688e6de0fe60fb4d165c042bde584b9f0708942b3380dc7011054dcc81",
+    "restate-cli-aarch64-unknown-linux-musl.tar.xz": "52eb0d7d836465634921bb019f81886e8fc65159eed6c9ca51c66797614bb8a9",
+    "restate-cli-x86_64-apple-darwin.tar.xz": "10c7142162c9bd436bd4ab851c7091d98149f03f1d3bc78b0d14ac5875cf1d5a",
+    "restate-cli-x86_64-unknown-linux-musl.tar.xz": "4e53f6e2dd08d12498d002ed9b1019ac93a0e9a46628059d4bd328c18c9a004d",
+    "restate-server-aarch64-apple-darwin.tar.xz": "5bef1dd6fced0bf4309f1d4b8cd40042cc1c0b2dbea5009805e1a0504483769d",
+    "restate-server-aarch64-unknown-linux-musl.tar.xz": "518d037193ffae891833c91d5eb24531639774cf61a285482e981807215361e9",
+    "restate-server-x86_64-apple-darwin.tar.xz": "e06cca0ed375e534bc64d68922a3f76874d72285edda4e0ae5a6e9875c2134f9",
+    "restate-server-x86_64-unknown-linux-musl.tar.xz": "d0ba8870eefd5e9d4b54d4a2a4b739b62cfe7bb86b1a444d497fa1989ac9bb36",
+    "restatectl-aarch64-apple-darwin.tar.xz": "9155a97898fb6bb2ca641dd6cc2a7ec726ff5b7db31efe8c30284947e7158064",
+    "restatectl-aarch64-unknown-linux-musl.tar.xz": "1df9626235fc1a315cf518f09f89319555ca2b318e5b8bc725508aaffb88fac8",
+    "restatectl-x86_64-apple-darwin.tar.xz": "0e3fcef78736729efd3af9332e925279f41464969d6c07c678e1a8896998cdae",
+    "restatectl-x86_64-unknown-linux-musl.tar.xz": "ba7a86b2369fedaaa84ec175bfe3a4af5ecec5ca843b8fe76ec10cebaa457769"
+  }
+}

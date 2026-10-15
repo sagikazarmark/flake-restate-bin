@@ -1,0 +1,68 @@
+name: Update
+
+on:
+  schedule:
+    - cron: "0 6 * * *"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release tag to update to (defaults to the latest release)
+        required: false
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: ${{ github.workflow }}
+
+jobs:
+  update:
+    name: Update Restate
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@v31
+
+      - name: Update sources
+        id: update
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          TAG: ${{ inputs.tag }}
+        run: |
+          echo "old=$(jq -r .version sources.json)" >> "$GITHUB_OUTPUT"
+          nix run .#update -- ${TAG:+"$TAG"}
+          echo "new=$(jq -r .version sources.json)" >> "$GITHUB_OUTPUT"
+
+      - name: Build
+        if: steps.update.outputs.old != steps.update.outputs.new
+        run: nix build --print-build-logs .#restate-bin
+
+      - name: Create pull request
+        id: pr
+        if: steps.update.outputs.old != steps.update.outputs.new
+        uses: peter-evans/create-pull-request@v8
+        with:
+          # Pull requests opened with the default GITHUB_TOKEN don't trigger other workflows (like CI).
+          # Set an UPDATE_TOKEN secret (PAT or GitHub App token) for CI to run on update PRs.
+          token: ${{ secrets.UPDATE_TOKEN || github.token }}
+          branch: update/restate
+          delete-branch: true
+          commit-message: "restate-bin: ${{ steps.update.outputs.old }} -> ${{ steps.update.outputs.new }}"
+          title: "restate-bin: ${{ steps.update.outputs.old }} -> ${{ steps.update.outputs.new }}"
+          body: |
+            Updates Restate from `${{ steps.update.outputs.old }}` to `${{ steps.update.outputs.new }}`.
+
+            Release notes: https://github.com/restatedev/restate/releases/tag/v${{ steps.update.outputs.new }}
+          labels: dependencies
+
+      - name: Enable auto-merge
+        if: steps.pr.outputs.pull-request-number
+        env:
+          GH_TOKEN: ${{ secrets.UPDATE_TOKEN || github.token }}
+          PR: ${{ steps.pr.outputs.pull-request-number }}
+        run: gh pr merge --repo "$GITHUB_REPOSITORY" --auto --squash "$PR"

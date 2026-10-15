@@ -1,0 +1,51 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  build:
+    name: Build (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@v31
+
+      - name: Check flake
+        run: nix flake check --print-build-logs
+
+      - name: Check formatting
+        run: nix fmt -- --ci
+
+      - name: Build
+        run: nix build --print-build-logs .#restate-bin
+
+      - name: Smoke test
+        env:
+          CI: "true"
+        run: |
+          ./result/bin/restate-server --base-dir "$RUNNER_TEMP/restate-data" > "$RUNNER_TEMP/restate-server.log" 2>&1 &
+          trap 'kill %1; cat "$RUNNER_TEMP/restate-server.log"' EXIT
+
+          curl --fail --silent --show-error --retry 30 --retry-connrefused --retry-delay 1 http://localhost:9070/health
+
+          ./result/bin/restate whoami
+          ./result/bin/restate sql 'SELECT 1'
