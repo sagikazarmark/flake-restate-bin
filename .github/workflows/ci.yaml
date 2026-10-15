@@ -42,7 +42,9 @@ jobs:
         env:
           CI: "true"
         run: |
-          ./result/bin/restate-server --base-dir "$RUNNER_TEMP/restate-data" > "$RUNNER_TEMP/restate-server.log" 2>&1 &
+          # Unix socket paths are limited to 104 bytes on macOS: keep the base dir and node name short
+          base_dir="$(mktemp -d /tmp/restate.XXXXXX)"
+          ./result/bin/restate-server --base-dir "$base_dir" --node-name ci > "$RUNNER_TEMP/restate-server.log" 2>&1 &
           trap 'kill %1; cat "$RUNNER_TEMP/restate-server.log"' EXIT
 
           curl --fail --silent --show-error --retry 30 --retry-connrefused --retry-delay 1 http://localhost:9070/health
